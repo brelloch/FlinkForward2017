@@ -1,12 +1,10 @@
 package com.bettercloud.flinkforward.serialization
 
 import com.bettercloud.flinkforward.models.CustomerEvent
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.module.scala.DefaultScalaModule
 import org.apache.flink.api.common.typeinfo.{BasicTypeInfo, TypeInformation}
 import org.apache.flink.streaming.util.serialization.{DeserializationSchema, SerializationSchema}
 
-import scala.util.control.NonFatal
+import scala.util.{Failure, Success, Try}
 
 class CustomerEventSchema extends DeserializationSchema[Option[CustomerEvent]] with SerializationSchema[CustomerEvent]{
   override def isEndOfStream(nextElement: Option[CustomerEvent]): Boolean = {
@@ -14,16 +12,11 @@ class CustomerEventSchema extends DeserializationSchema[Option[CustomerEvent]] w
   }
 
   override def deserialize(message: Array[Byte]): Option[CustomerEvent] = {
-    val mapper = new ObjectMapper()
-    mapper.registerModule(DefaultScalaModule)
-
     val jsonString = new String(message, "UTF-8")
 
-    try {
-      val obj: CustomerEvent = CustomerEvent.fromJson(jsonString)
-      Some(obj)
-    } catch {
-      case NonFatal(ex) => println(ex); None
+    Try(CustomerEvent.fromJson(jsonString)) match {
+      case Success(customerEvent) => Some(customerEvent)
+      case Failure(ex) => None
     }
   }
 

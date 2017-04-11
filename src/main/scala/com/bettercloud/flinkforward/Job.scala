@@ -86,10 +86,10 @@ object Job {
       .connect(
         eventStream
       )
-      .flatMap(filterFunction).startNewChain().name("Filtering Function")
+      .flatMap(filterFunction).name("Filtering Function")
       .union(bootstrapStream)
-      .flatMap(qualifierFunction).startNewChain().name("Qualifier Function")
-      .flatMap(counterFunction).startNewChain().name("Counter Function")
+      .flatMap(qualifierFunction).name("Qualifier Function")
+      .flatMap(counterFunction).name("Counter Function")
       .addSink(bootstrapSink)
 
     // execute program
