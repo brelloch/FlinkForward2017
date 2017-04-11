@@ -19,7 +19,9 @@ class FilterFunction() extends RichCoFlatMapFunction[ControlEvent, CustomerEvent
   override def flatMap2(value: CustomerEvent, out: Collector[FilteredEvent]): Unit = {
     val eventConfigs = configs.filter(x => (x.customerId == x.customerId) || (x.customerId == Constants.GLOBAL_CUSTOMER_ID))
 
-    out.collect(FilteredEvent(value, eventConfigs.toList))
+    if (eventConfigs.size > 0) {
+      out.collect(FilteredEvent(value, eventConfigs.toList))
+    }
   }
 
 }

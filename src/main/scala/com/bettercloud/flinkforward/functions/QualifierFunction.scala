@@ -10,15 +10,16 @@ import scala.util.Try
 
 class QualifierFunction extends FlatMapFunction[FilteredEvent, QualifiedEvent] {
   override def flatMap(value: FilteredEvent, out: Collector[QualifiedEvent]): Unit = {
-    value.controls.foreach(control => {
-      Try {
-        val parse = JsonPath.parse(value.event.payload) // move parse outside of foreach for performance
-        val result: String = parse.read(control.jsonPath)
+    Try(JsonPath.parse(value.event.payload)).map(ctx => {
+      value.controls.foreach(control => {
+        Try {
+          val result: String = ctx.read(control.jsonPath)
 
-        if (!result.isEmpty) {
-          out.collect(QualifiedEvent(value.event, control))
+          if (!result.isEmpty) {
+            out.collect(QualifiedEvent(value.event, control))
+          }
         }
-      }
+      })
     })
   }
 }
